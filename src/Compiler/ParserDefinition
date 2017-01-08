@@ -1,0 +1,71 @@
+package Compiler;
+import java_cup.runtime.*;
+
+parser code
+{:
+    
+    public void syntax_error(Symbol s){ 
+            System.out.println("Error Sintáctico en la Línea " + (s.left) +" Columna "+s.right+ ". No se esperaba este componente: " +s.value+"."); 
+    } 
+   
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+            System.out.println("Error síntactico irrecuperable en la Línea " + (s.left)+ " Columna "+s.right+". Componente " + s.value + " no reconocido."); 
+    }  
+
+
+:}
+
+action code
+{:
+    
+    
+:}
+
+non terminal RPROYECTO, RENTERO, RDECIMAL, RLOGICO, RNADA, RIGUAL, RPUBLICO, RPRIVADO, RRETORNO;
+non terminal RSI, RSINO, RPARA, RMIENTRAS, RVERDADERO, RFALSO;
+non terminal RRAIZ, RPOTENCIA, RNOT, RIMPRIMIR;
+non terminal RIGUAL, RMENOR, RMAYOR, RAND, ROR, RMAS, RMENOS, RPOR, RENTRE;
+non terminal RPARIZQ, RPARDER, RLLAVEIZQ, RLLAVEDER, RFIN, RCOMA;
+non terminal String ENTERO, DECIMAL, ID, CADENA;
+
+start with I;
+
+
+I ::= B {: System.out.println("Exito"); :}
+;
+
+
+B::= reservada num:n fin{:
+    
+    System.out.println("Lista :" + n);:}
+    |reservada L:last fin {:
+                            System.out.print(", ");
+                            last.printMe();
+                            System.out.print(";");
+                           :}
+;
+
+L::= L:last coma num:n{:
+                          RESULT= new Valor(n);
+                          
+                          if(last.val== n){
+                                RESULT.matched=true;
+                                last.matched=true;
+                          }
+                          System.out.print("," );
+                          last.printMe();
+                        :}
+    |num:n1 coma num: n2  {:
+                    RESULT=new Valor(n2);
+                    if(n1==n2){
+                        RESULT.matched=true;
+                        System.out.print( "*,");
+                    }else{
+                        System.out.print(n1 );
+                    }
+                    :}
+;
+
+
+
+

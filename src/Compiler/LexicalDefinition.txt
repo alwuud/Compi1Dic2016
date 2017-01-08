@@ -1,0 +1,122 @@
+package Compiler;
+import java_cup.runtime.*;
+
+%%
+
+%state A
+%state B
+%public
+%class Scanner
+%cupsym Sim
+%cup
+%line
+%column
+%unicode
+
+%{
+    private String buffer="";
+
+    private Symbol symbol(int type) {
+        return new Symbol(type, yyline, yycolumn);
+    }
+
+    private Symbol symbol(int type, Object value) {
+        return new Symbol(type, yyline, yycolumn, value);
+    }
+
+%}
+
+FinLinea = \r|\n|\r\n
+Espacio    = {FinLinea} | [ \t\f\b\012]
+alf= [a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]
+id= {alf}({alf}|[0-9])*
+num= [0-9]+
+dec= {num} "." {num}
+com= "//".* {FinLinea}
+
+%%
+
+
+<YYINITIAL>{
+
+
+"Proyecto" {return symbol(Sim.RPROYECTO);}
+"Entero" {return symbol(Sim.RENTERO);}
+"Decimal" {return symbol(Sim.RDECIMAL);}
+"Logico" {return symbol(Sim.RLOGICO);}
+"Nada" {return symbol(Sim.RNADA);}
+"Igual A" {return symbol(Sim.RIGUAL);}
+"Publico" {return symbol(Sim.RPUBLICO);}
+"Privado" {return symbol(Sim.RPRIVADO);}
+"Retorno" {return symbol(Sim.RRETORNO);}
+"SI" {return symbol(Sim.RSI);}
+"SINO" {return symbol(Sim.RSINO);}
+"PARA" {return symbol(Sim.RPARA);}
+"MIENTRAS" {return symbol(Sim.RMIENTRAS);}
+"Verdadero" { return symbol(Sim.VERDADERO);}
+"Falso" { return symbol(Sim.FALSO);}
+
+
+"Rq" {return symbol(Sim.RRAIZ);}
+"Ptn" {return symbol(Sim.RPOTENCIA);}
+"N" {return symbol(Sim.RNOT);}
+"imprimir" {return symbol(Sim.RIMPRIMIR);}
+
+
+"**"  {yybegin(A); buffer="";}
+"&&" {yybegin(B); buffer="";}
+
+
+"==" {return symbol(Sim.IGUAL);}
+"<" {return symbol(Sim.MENOR);}
+">" {return symbol(Sim.MAYOR);}
+"¡!" {return symbol(Sim.AND);}
+"##" {return symbol(Sim.OR);}
+
+"+" {return symbol(Sim.MAS);}
+"-" {return symbol(Sim.MENOS);}
+"*" {return symbol(Sim.POR);}
+"/" {return symbol(Sim.ENTRE);}
+
+
+
+"(" {return symbol(Sim.PARIZQ);}
+")" {return symbol(Sim.PARDER);}
+"{" {return symbol(Sim.LLAVEIZQ);}
+"}" {return symbol(Sim.LLAVEDER);}
+";" {return symbol(Sim.FIN);}
+"," {return symbol(Sim.COMA);}
+
+{com}   {}
+{num}  {return symbol(Sim.ENTERO, yytext());}
+{dec} {return symbol(Sim.DECIMAL, yytext());}
+{id} {return symbol(Sim.ID, yytext());}
+
+
+
+
+ {Espacio}+ { }
+
+
+
+
+/* Cualquier Otro */
+.   { return symbol(Sim.ERROR, yytext()); }
+
+}
+
+<A>{
+   
+
+    "**"  {yybegin(YYINITIAL); return symbol(Sim.CADENA, buffer);}
+    <<EOF>> {yybegin(YYINITIAL);return symbol(Sim.ERROR, yytext());}
+    {FinLinea} {yybegin(YYINITIAL); return symbol(Sim.ERROR, yytext());}
+    .   {buffer+=yytext();}
+}
+
+<B>{
+   
+   "%%"  {yybegin(YYINITIAL); }
+   <<EOF>> {yybegin(YYINITIAL);return symbol(Sim.ERROR, yytext());}
+    .   { buffer+= yytext(); }
+}
